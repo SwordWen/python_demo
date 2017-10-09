@@ -40,6 +40,56 @@ def get_empty_index(sudoku_maxtrix, row_record, column_record, cell_record):
     print sudoku_maxtrix
     return -1, -1
 
+def reset_sudoku_number(sudoku_maxtrix, value):
+    for i in range(9):
+        for j in range(9):
+            if sudoku_maxtrix[i][j] == value:
+                sudoku_maxtrix[i][j] = 0
+
+def set_sudoku_number_dynamic(sudoku_maxtrix, value):
+    row_record = [0 for x in range(9)]
+    column_record = [0 for x in range(9)]
+    cell_record = [0 for x in range(9)]
+    stack = []
+    for x in range(9):
+        for y in range(9):
+            cell_index = get_cell_index(x, y)
+            if 0 == row_record[x] and 0 == column_record[y] and 0 == cell_record[cell_index]:
+                row_record[x] = value
+                column_record[y] = value
+                cell_record[cell_index] = value
+                sudoku_maxtrix[x][y] = value
+                stack.append((x,y))
+
+    
+
+def set_sudoku_number(sudoku_maxtrix, value):
+    random.seed()
+    row_record = [0 for x in range(9)]
+    column_record = [0 for x in range(9)]
+    cell_record = [0 for x in range(9)]
+    #print row_record
+    count = 0
+    while(count < 9):
+
+        x, y = get_empty_index(sudoku_maxtrix, row_record, column_record, cell_record)
+        cell_index = get_cell_index(x, y)
+        #print "get_empty_index: ({0},{1})".format(x, y)
+        if x == -1: 
+            print "get_empty_index for value {0} failed: ({1},{2})".format(value, x, y)
+            return False
+        
+        if 0 == row_record[x] and 0 == column_record[y] and 0 == cell_record[cell_index]:
+            row_record[x] = value
+            column_record[y] = value
+            cell_record[cell_index] = value
+            sudoku_maxtrix[x][y] = value
+            count = count + 1
+    
+    return True
+    # print row_record
+    # print column_record
+    # print cell_record    
 
 def set_sudoku_number_with_random(sudoku_maxtrix, value):
     random.seed()
@@ -58,7 +108,7 @@ def set_sudoku_number_with_random(sudoku_maxtrix, value):
             cell_index = get_cell_index(x, y)
             #print "get_empty_index: ({0},{1})".format(x, y)
             if x == -1: 
-                print "get_empty_index failed: ({0},{1})".format(x, y)
+                print "get_empty_index for value {0} failed: ({1},{2})".format(value, x, y)
                 return False
         
         if 0 == row_record[x] and 0 == column_record[y] and 0 == cell_record[cell_index]:
@@ -79,5 +129,14 @@ def set_sudoku_case(sudoku_maxtrix):
         result = set_sudoku_number_with_random(sudoku_maxtrix, i + 1)   
         print  sudoku_maxtrix
         if result is False:
-            return False
+            reset_sudoku_number(sudoku_maxtrix, i + 1)
+            for j in range(10):
+                result = set_sudoku_number_with_random(sudoku_maxtrix, i + 1) 
+                if result == True:
+                    break
+                else:
+                    reset_sudoku_number(sudoku_maxtrix, i + 1)
+                
+            if result == False:
+                return False
     return True

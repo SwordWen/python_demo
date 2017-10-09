@@ -9,6 +9,8 @@ sys.path.append("../src")
 from sudoku import check_row
 from sudoku import get_cell_index
 from sudoku import set_sudoku_number_with_random
+from sudoku import set_sudoku_number
+from sudoku import set_sudoku_number_dynamic
 from sudoku import set_sudoku_case
 
 class TestSudoku(unittest.TestCase):
@@ -27,20 +29,33 @@ class TestSudoku(unittest.TestCase):
         self.assertEqual(get_cell_index(0, 0), 0)
         self.assertEqual(get_cell_index(8, 8), 8)
 
-    def test_set_sudoku_number(self):
+    def test_set_sudoku_number_with_random(self):
         matrix = np.zeros( (9,9) ,dtype=int)
         set_sudoku_number_with_random(matrix, 1)
+        print "set_sudoku_number_with_random:"
         print matrix
 
-    def test_set_sudoku_case(self):
+    def test_set_sudoku_number(self):
         matrix = np.zeros( (9,9) ,dtype=int)
-        for i in range(10000):
-            matrix = np.zeros( (9,9) ,dtype=int)
-            if True == set_sudoku_case(matrix):
-                break
-        for i in range(9):
-            print matrix[i]
-            self.assertEqual(check_row(matrix, i), True)
+        set_sudoku_number(matrix, 1)
+        print "set_sudoku_number:"
+        print matrix
+
+    def test_set_sudoku_number_dynamic(self):
+        matrix = np.zeros( (9,9) ,dtype=int)
+        set_sudoku_number_dynamic(matrix, 1)
+        print "set_sudoku_number_dynamic:"
+        print matrix
+
+    # def test_set_sudoku_case(self):
+    #     matrix = np.zeros( (9,9) ,dtype=int)
+    #     for i in range(1):
+    #         matrix = np.zeros( (9,9) ,dtype=int)
+    #         if True == set_sudoku_case(matrix):
+    #             break
+    #     for i in range(9):
+    #         print matrix[i]
+    #         self.assertEqual(check_row(matrix, i), True)
 
 
 
