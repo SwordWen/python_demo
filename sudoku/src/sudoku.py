@@ -14,7 +14,7 @@ def check_row(sudoku_maxtrix, index):
         else:
             count = count + 2
         #print "sudoku_maxtrix[index][i]={0},count={1}".format(sudoku_maxtrix[index][i], count)
-        if count != i+1:
+        if count != 9:
             return False
     return True
 
@@ -46,22 +46,7 @@ def reset_sudoku_number(sudoku_maxtrix, value):
             if sudoku_maxtrix[i][j] == value:
                 sudoku_maxtrix[i][j] = 0
 
-def set_sudoku_number_dynamic(sudoku_maxtrix, value):
-    row_record = [0 for x in range(9)]
-    column_record = [0 for x in range(9)]
-    cell_record = [0 for x in range(9)]
-    stack = []
-    for x in range(9):
-        for y in range(9):
-            cell_index = get_cell_index(x, y)
-            if 0 == row_record[x] and 0 == column_record[y] and 0 == cell_record[cell_index]:
-                row_record[x] = value
-                column_record[y] = value
-                cell_record[cell_index] = value
-                sudoku_maxtrix[x][y] = value
-                stack.append((x,y))
 
-    
 
 def set_sudoku_number(sudoku_maxtrix, value):
     random.seed()
@@ -139,4 +124,96 @@ def set_sudoku_case(sudoku_maxtrix):
                 
             if result == False:
                 return False
+    return True
+
+def set_sudoku_number_dynamic(sudoku_maxtrix, value, stack=[]):
+    row_record = [0 for x in range(9)]
+    column_record = [0 for x in range(9)]
+    cell_record = [0 for x in range(9)]
+    #stack = []
+    x = 0
+    y = 0
+
+    if len(stack) > 0:
+        (i , j) = stack.pop()
+        sudoku_maxtrix[i][j] = 0
+        x = i
+        y = j + 1
+        for i, j in stack:
+            cell_index = get_cell_index(i, j)
+            row_record[i] = value
+            column_record[j] = value
+            cell_record[cell_index] = value
+
+
+    print "set_sudoku_number_dynamic: i={0}, j={1}, value={2}".format(x, y, value)
+    while len(stack) < 9:
+        #for x in range(0, 9):
+        while x < 9:
+            #for y in range(0, 9):
+            while y < 9:
+                cell_index = get_cell_index(x, y)
+                # if value == 2:
+                #     print "get_cell_index: x={0}, y={1}".format(x, y)
+                if 0 == row_record[x] and 0 == column_record[y] and 0 == cell_record[cell_index] and sudoku_maxtrix[x][y]==0:
+                    row_record[x] = value
+                    column_record[y] = value
+                    cell_record[cell_index] = value
+                    sudoku_maxtrix[x][y] = value
+                    print "find locaton({0}, {1}) for value {2}".format(x, y, value)
+                    stack.append((x,y))
+                y = y + 1
+            x = x + 1
+            y = 0
+
+        if len(stack) == 0:
+            print "Can't set_sudoku_number_dynamic with value " + str(value)
+            break
+        elif len(stack) < 9:            
+            (i, j) = stack.pop()
+            #print "Can't set_sudoku_number_dynamic, and re-try from " + str((i,j))
+            #print sudoku_maxtrix
+            cell_index = get_cell_index(i, j)
+            row_record[i] = 0
+            column_record[j] = 0
+            cell_record[cell_index] = 0
+            sudoku_maxtrix[i][j] = 0
+            x = i
+            y = j + 1
+
+
+ 
+    print "stack for value({0}): ({1})".format(str(value), str(stack))
+    print sudoku_maxtrix
+    if len(stack) == 9:
+        return True
+    else:
+        return False
+
+def set_sudoku_case_dynamic(sudoku_maxtrix):
+    stack_list = []
+    index = 0
+    stack = []
+    while len(stack_list) < 9:
+        # for i in range(index, 9):
+        #     index = i
+          
+        result = set_sudoku_number_dynamic(sudoku_maxtrix, index+1, stack)
+        if result == True:
+            stack_list.append(stack)
+            stack = []
+            index = index + 1
+        else:
+            # print "Can't set sudoku number value = {0}".format(index+1)
+            # reset_sudoku_number(sudoku_maxtrix, index + 1)
+
+            if len(stack_list) == 0:
+                print "Can't set_sudoku_case_dynamic with value " + str(index + 1)
+                return False
+            elif len(stack) > 0:
+                print "Try to set_sudoku_case_dynamic with value " + str(index + 1)
+            elif len(stack_list) < 9:
+                stack = stack_list.pop()
+                index = index - 1
+            
     return True
