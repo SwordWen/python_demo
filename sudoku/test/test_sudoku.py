@@ -7,6 +7,7 @@ import numpy as np
 sys.path.append("../src")
 
 from sudoku import check_row
+from sudoku import check_column
 from sudoku import get_cell_index
 from sudoku import set_sudoku_number_with_random
 from sudoku import set_sudoku_number
@@ -16,15 +17,25 @@ from sudoku import set_sudoku_case_dynamic
 
 class TestSudoku(unittest.TestCase):
 
-    # def test_check_row_1(self):
-    #     matrix = np.zeros( (9,9) ,dtype=int)
-    #     #print matrix
-    #     #print "distance(1,1,0,0) = " + str(distance(1,1,0,0))
-    #     self.assertEqual(check_row(matrix, 0), False)
-    #     for i in range(9):
-    #         matrix[0][i] = i + 1
-    #     #print matrix
-    #     self.assertEqual(check_row(matrix, 0), True)
+    def test_check_row_1(self):
+        matrix = np.zeros( (9,9) ,dtype=int)
+        #print matrix
+        #print "distance(1,1,0,0) = " + str(distance(1,1,0,0))
+        self.assertEqual(check_row(matrix, 0), False)
+        for i in range(9):
+            matrix[0][i] = i + 1
+        #print matrix
+        self.assertEqual(check_row(matrix, 0), True)
+
+    def test_check_column_1(self):
+        matrix = np.zeros( (9,9) ,dtype=int)
+        #print matrix
+        #print "distance(1,1,0,0) = " + str(distance(1,1,0,0))
+        self.assertEqual(check_column(matrix, 0), False)
+        for i in range(9):
+            matrix[i][0] = i + 1
+        #print matrix
+        self.assertEqual(check_column(matrix, 0), True)
 
     # def test_get_cell_index(self):
     #     self.assertEqual(get_cell_index(0, 0), 0)
@@ -71,6 +82,7 @@ class TestSudoku(unittest.TestCase):
             print matrix[i]
             print "check_row: index = {0}".format(i)
             self.assertEqual(check_row(matrix, i), True)
+            self.assertEqual(check_column(matrix, i), True)
 
 
 

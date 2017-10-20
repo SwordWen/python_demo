@@ -6,20 +6,30 @@ import numpy as np
 #print matrix
 
 def check_row(sudoku_maxtrix, index):
-    count = 0
+    row_record = [0 for x in range(9)]
     for i in range(9):
         #print sudoku_maxtrix[index]
-        if sudoku_maxtrix[index][i] == i+1:
-            count = count + 1
-        else:
-            count = count + 2
+        if sudoku_maxtrix[index][i] >=1 and sudoku_maxtrix[index][i] <= 9:
+            row_record[sudoku_maxtrix[index][i]-1] = row_record[sudoku_maxtrix[index][i]-1] + 1
+
         #print "sudoku_maxtrix[index][i]={0},count={1}".format(sudoku_maxtrix[index][i], count)
-        if count != 9:
+    for x in row_record:
+        if x != 1:
             return False
     return True
 
 def check_column(sudoku_maxtrix, index):
-    pass
+    column_record = [0 for x in range(9)]
+    for i in range(9):
+        #print sudoku_maxtrix[index]
+        if sudoku_maxtrix[i][index] >=1 and sudoku_maxtrix[i][index] <= 9:
+            column_record[sudoku_maxtrix[i][index]-1]= column_record[sudoku_maxtrix[i][index]-1] + 1
+
+        #print "sudoku_maxtrix[index][i]={0},count={1}".format(sudoku_maxtrix[index][i], count)
+    for x in column_record:
+        if x != 1:
+            return False
+    return True
 
 def check_cell(sudoku_maxtrix, index_x, index_y):
     pass
