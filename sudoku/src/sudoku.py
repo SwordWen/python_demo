@@ -30,9 +30,23 @@ def check_column(sudoku_maxtrix, index):
         if x != 1:
             return False
     return True
+"""
+Cell Location:
+0, 1, 2
+3, 4, 5
+6, 7, 9
+"""
+def check_cell(sudoku_maxtrix, cell_index):
+    record = [0 for x in range(9)]
+    for i in range(9):
+        for j in range(9):
+            if cell_index == get_cell_index(i, j) and sudoku_maxtrix[i][j] >=1 and sudoku_maxtrix[i][j] <= 9:
+                record[sudoku_maxtrix[i][j]-1]= record[sudoku_maxtrix[i][j]-1] + 1
 
-def check_cell(sudoku_maxtrix, index_x, index_y):
-    pass
+    for x in record:
+        if x != 1:
+            return False
+    return True
 
 def get_cell_index(x, y):
     cell_x = x/3
@@ -221,8 +235,10 @@ def set_sudoku_case_dynamic(sudoku_maxtrix):
                 print "Can't set_sudoku_case_dynamic with value " + str(index + 1)
                 return False
             elif len(stack) > 0:
+                #Come to previous location with same number
                 print "Try to set_sudoku_case_dynamic with value " + str(index + 1)
             elif len(stack_list) < 9:
+                #Come to previous location with previous number
                 stack = stack_list.pop()
                 index = index - 1
             

@@ -8,6 +8,7 @@ sys.path.append("../src")
 
 from sudoku import check_row
 from sudoku import check_column
+from sudoku import check_cell
 from sudoku import get_cell_index
 from sudoku import set_sudoku_number_with_random
 from sudoku import set_sudoku_number
@@ -82,7 +83,10 @@ class TestSudoku(unittest.TestCase):
             print matrix[i]
             print "check_row: index = {0}".format(i)
             self.assertEqual(check_row(matrix, i), True)
+            print "check_column: index = {0}".format(i)
             self.assertEqual(check_column(matrix, i), True)
+            print "check_cell: index = {0}".format(i)
+            self.assertEqual(check_cell(matrix, i), True)
 
 
 
