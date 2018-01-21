@@ -1,0 +1,10 @@
+[Unit]
+Description=Shadowsocks Server
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/ssserver -c /etc/shadowsocks/shadowsocks.json --log-file /var/log/shadowsocks.log
+
+
+[Install]
+WantedBy=multi-user.target
