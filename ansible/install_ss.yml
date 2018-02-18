@@ -1,0 +1,32 @@
+---
+# This playbook deploys the whole application stack in this site.
+
+#hosts:
+#[shadowsocks]
+#ip:port
+
+#command
+
+- hosts: shadowsocks
+  remote_user: root
+  tasks:
+   - name: Install pip
+     yum: name=python2-pip state=present
+
+   - name: pip install shadowsocks
+     command: pip install shadowsocks
+
+   - name: create shadowsocks configuration folder
+     command: mkdir -p /etc/shadowsocks
+
+   - name: Copy shadowsocks service file
+     copy: src=systemd/shadowsocks.service dest=/etc/systemd/system
+
+   - name: Copy shadowsocks configuration file
+     copy: src=systemd/shadowsocks.json dest=/etc/shadowsocks
+
+   - name: enable shadowsocks service
+     command: systemctl enable shadowsocks
+
+   - name: start shadowsocks service
+     command: systemctl start shadowsocks
