@@ -1,3 +1,5 @@
 
-x = 1
+#x = 1
 print( (lambda x: x*x)(1) )
+
+print( (lambda x: x*x)(2) )
