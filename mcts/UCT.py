@@ -49,11 +49,13 @@ class GameState:
         """ Get the game result from the viewpoint of playerjm. 
         """
 
+    def PrintState(self):
+        pass
+
     def __repr__(self):
         """ Don't need this - but good style.
         """
         pass
-
 
 class NimState:
     """ A state of the game Nim. In Nim, players alternately take 1,2 or 3 chips with the 
@@ -95,6 +97,9 @@ class NimState:
         else:
             return 0.0 # playerjm's opponent took the last chip and has won
 
+    def PrintState(self):
+        pass
+
     def __repr__(self):
         s = "Chips:" + str(self.chips) + " JustPlayed:" + str(self.playerJustMoved)
         return s
@@ -110,6 +115,7 @@ class OXOState:
     def __init__(self):
         self.playerJustMoved = 2 # At the root pretend the player just moved is p2 - p1 has the first move
         self.board = [0,0,0,0,0,0,0,0,0] # 0 = empty, 1 = player 1, 2 = player 2
+        self.size = 3
         
     def Clone(self):
         """ Create a deep clone of this game state.
@@ -144,9 +150,122 @@ class OXOState:
         if self.GetMoves() == []: return 0.5 # draw
         assert False # Should not be possible to get here
 
+    def PrintState(self):
+        for i in range(self.size):
+            print("{0},{1},{2}".format(self.board[i*self.size ]
+            , self.board[i*self.size + 1], self.board[i*self.size + 2]))
+
     def __repr__(self):
         s= ""
         for i in range(9): 
+            s += ".XO"[self.board[i]]
+            if i % 3 == 2: s += "\n"
+        return s
+
+class OXOStateEX:
+    """ A state of the game, i.e. the game board.
+        Squares in the board are in this arrangement
+        012
+        345
+        678
+        where 0 = empty, 1 = player 1 (X), 2 = player 2 (O)
+    """
+    def __init__(self, board_size, win_length):
+        self.playerJustMoved = 2 # At the root pretend the player just moved is p2 - p1 has the first move
+        self.board = [0 for x in range(board_size*board_size)] # 0 = empty, 1 = player 1, 2 = player 2
+        self.board_size = board_size
+        self.win_length = win_length
+        
+    def Clone(self):
+        """ Create a deep clone of this game state.
+        """
+        st = OXOStateEX(self.board_size, self.win_length)
+        st.playerJustMoved = self.playerJustMoved
+        st.board = self.board[:]
+        return st
+
+    def DoMove(self, move):
+        """ Update a state by carrying out the given move.
+            Must update playerToMove.
+        """
+        assert move >= 0 and move <= len(self.board) and move == int(move) and self.board[move] == 0
+        self.playerJustMoved = 3 - self.playerJustMoved
+        self.board[move] = self.playerJustMoved
+        
+    def GetMoves(self):
+        """ Get all possible moves from this state.
+        """
+        return [i for i in range(self.board_size*self.board_size) if self.board[i] == 0]
+    
+    def __IsHorizontalSame(self, i, j, playerjm):
+        if i >=0 and i + self.win_length < self.board_size:
+            count = 1
+            for k in range(self.win_length - 1):
+                if self.board[i+j*self.board_size] == self.board[i+j*self.board_size + k + 1]:
+                    count += 1
+            if count == self.win_length:
+                if self.board[i+j*self.board_size] == playerjm:
+                    return True
+                else:
+                    return False
+        else:
+            return False
+
+    def __IsInclinedSame(self, i, j, playerjm):
+        if i >=0 and i + self.win_length < self.board_size and j >=0 and j + self.win_length < self.board_size:
+            count = 1
+            for k in range(self.win_length - 1):
+                if self.board[i+j*self.board_size] == self.board[i+k+1 + (j+k+1)*self.board_size]:
+                    count += 1
+            if count == self.win_length:
+                if self.board[i+j*self.board_size] == playerjm:
+                    return True
+                else:
+                    return False
+        else:
+            return False
+
+    def __IsVerticalSame(self, i, j, playerjm):
+        if j >=0 and j + self.win_length < self.board_size:
+            count = 1
+            for k in range(self.win_length - 1):
+                if self.board[i+j*self.board_size] == self.board[i+(j+k+1)*self.board_size]:
+                    count += 1
+            if count == self.win_length:
+                if self.board[i+j*self.board_size] == playerjm:
+                    return True
+                else:
+                    return False
+        else:
+            return False
+
+    def GetResult(self, playerjm):
+        """ Get the game result from the viewpoint of playerjm. 
+        """
+        for i in range(self.board_size):
+            for j in range(self.board_size):
+                if self.__IsHorizontalSame(i, j, playerjm) or self.__IsInclinedSame(i, j, playerjm) or self.__IsVerticalSame(i, j, playerjm):
+                    if self.board[i+j*self.board_size] == playerjm:
+                        return 1.0
+                    else:
+                        return 0.0
+
+        if self.GetMoves() == []: return 0.5 # draw
+        else:
+            return 0.0
+        assert False # Should not be possible to get here
+
+    def PrintState(self):
+        for j in range(self.board_size):
+            line = ""
+            for i in range(self.board_size):
+                line = line + " " + str(self.board[i+j*self.board_size]) 
+            print line
+
+
+    def __repr__(self):
+        s= ""
+        for i in range(self.board_size): 
             s += ".XO"[self.board[i]]
             if i % 3 == 2: s += "\n"
         return s
@@ -257,6 +376,9 @@ class OthelloState:
         elif notjmcount > jmcount: return 0.0
         else: return 0.5 # draw
 
+    def PrintState(self):
+        pass
+
     def __repr__(self):
         s= ""
         for y in range(self.size-1,-1,-1):
@@ -365,16 +487,20 @@ def UCTPlayGame():
         of UCT iterations (= simulations = tree nodes).
     """
     # state = OthelloState(4) # uncomment to play Othello on a square board of the given size
-    # state = OXOState() # uncomment to play OXO
-    state = NimState(15) # uncomment to play Nim with the given number of starting chips
+    #state = OXOState() # uncomment to play OXO
+    # state = NimState(15) # uncomment to play Nim with the given number of starting chips
+    state = OXOStateEX(11, 5)
     while (state.GetMoves() != []):
-        print str(state)
+        #print str(state)
         if state.playerJustMoved == 1:
-            m = UCT(rootstate = state, itermax = 1000, verbose = False) # play with values for itermax and verbose = True
+            m = UCT(rootstate = state, itermax = 5000, verbose = False) # play with values for itermax and verbose = True
         else:
             m = UCT(rootstate = state, itermax = 100, verbose = False)
         print "Best Move: " + str(m) + "\n"
         state.DoMove(m)
+        state.PrintState()
+        if state.GetResult(state.playerJustMoved) == 1.0:
+            break
     if state.GetResult(state.playerJustMoved) == 1.0:
         print "Player " + str(state.playerJustMoved) + " wins!"
     elif state.GetResult(state.playerJustMoved) == 0.0:
