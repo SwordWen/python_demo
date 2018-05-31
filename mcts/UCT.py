@@ -148,7 +148,8 @@ class OXOState:
                 else:
                     return 0.0
         if self.GetMoves() == []: return 0.5 # draw
-        assert False # Should not be possible to get here
+        #assert False # Should not be possible to get here
+        return 0.0
 
     def PrintState(self):
         for i in range(self.size):
@@ -173,6 +174,8 @@ class OXOStateEX:
     def __init__(self, board_size, win_length):
         self.playerJustMoved = 2 # At the root pretend the player just moved is p2 - p1 has the first move
         self.board = [0 for x in range(board_size*board_size)] # 0 = empty, 1 = player 1, 2 = player 2
+        self.steps = [-1 for x in range(board_size*board_size)]
+        self.cur_step = 0
         self.board_size = board_size
         self.win_length = win_length
         
@@ -182,6 +185,8 @@ class OXOStateEX:
         st = OXOStateEX(self.board_size, self.win_length)
         st.playerJustMoved = self.playerJustMoved
         st.board = self.board[:]
+        st.board_size = self.board_size
+        st.win_length = self.win_length
         return st
 
     def DoMove(self, move):
@@ -191,51 +196,59 @@ class OXOStateEX:
         assert move >= 0 and move <= len(self.board) and move == int(move) and self.board[move] == 0
         self.playerJustMoved = 3 - self.playerJustMoved
         self.board[move] = self.playerJustMoved
+        self.steps[self.cur_step] = move
+        self.cur_step += 1
         
     def GetMoves(self):
         """ Get all possible moves from this state.
         """
         return [i for i in range(self.board_size*self.board_size) if self.board[i] == 0]
     
-    def __IsHorizontalSame(self, i, j, playerjm):
-        if i >=0 and i + self.win_length < self.board_size:
+    def IsHorizontalSame(self, i, j, playerjm):
+        if i >=0 and i + self.win_length <= self.board_size:
             count = 1
             for k in range(self.win_length - 1):
                 if self.board[i+j*self.board_size] == self.board[i+j*self.board_size + k + 1]:
                     count += 1
             if count == self.win_length:
-                if self.board[i+j*self.board_size] == playerjm:
-                    return True
-                else:
-                    return False
+                return True
+            else:
+                return False
         else:
             return False
 
-    def __IsInclinedSame(self, i, j, playerjm):
-        if i >=0 and i + self.win_length < self.board_size and j >=0 and j + self.win_length < self.board_size:
+    def IsInclinedSame(self, i, j, playerjm):
+        if i >=0 and i + self.win_length <= self.board_size and j >=0 and j + self.win_length <= self.board_size:
             count = 1
             for k in range(self.win_length - 1):
                 if self.board[i+j*self.board_size] == self.board[i+k+1 + (j+k+1)*self.board_size]:
                     count += 1
             if count == self.win_length:
-                if self.board[i+j*self.board_size] == playerjm:
-                    return True
-                else:
-                    return False
+                return True
+            else:
+                return False
+        elif i + 1 - self.win_length >= 0 and j >=0 and j + self.win_length <= self.board_size:
+            count = 1
+            for k in range(self.win_length - 1):
+                if self.board[i+j*self.board_size] == self.board[i-(k+1) + (j+k+1)*self.board_size]:
+                    count += 1
+            if count == self.win_length:
+                return True
+            else:
+                return False
         else:
             return False
 
-    def __IsVerticalSame(self, i, j, playerjm):
-        if j >=0 and j + self.win_length < self.board_size:
+    def IsVerticalSame(self, i, j, playerjm):
+        if j >=0 and j + self.win_length <= self.board_size:
             count = 1
             for k in range(self.win_length - 1):
                 if self.board[i+j*self.board_size] == self.board[i+(j+k+1)*self.board_size]:
                     count += 1
             if count == self.win_length:
-                if self.board[i+j*self.board_size] == playerjm:
-                    return True
-                else:
-                    return False
+                return True
+            else:
+                return False
         else:
             return False
 
@@ -244,11 +257,12 @@ class OXOStateEX:
         """
         for i in range(self.board_size):
             for j in range(self.board_size):
-                if self.__IsHorizontalSame(i, j, playerjm) or self.__IsInclinedSame(i, j, playerjm) or self.__IsVerticalSame(i, j, playerjm):
-                    if self.board[i+j*self.board_size] == playerjm:
-                        return 1.0
-                    else:
-                        return 0.0
+                if self.IsHorizontalSame(i, j, playerjm) or self.IsInclinedSame(i, j, playerjm) or self.IsVerticalSame(i, j, playerjm):
+                    if self.board[i+j*self.board_size] !=0:
+                        if self.board[i+j*self.board_size] == playerjm:
+                            return 1.0
+                        else:
+                            return 0.0
 
         if self.GetMoves() == []: return 0.5 # draw
         else:
@@ -256,11 +270,20 @@ class OXOStateEX:
         assert False # Should not be possible to get here
 
     def PrintState(self):
+        line = "   "
+        for i in range(self.board_size):
+                line = line + " " + str(i) 
+        print(line)
+        line = "   "
+        for i in range(self.board_size):
+            line = line + "__" 
+        print(line)
+
         for j in range(self.board_size):
-            line = ""
+            line = "{0}| ".format(j)
             for i in range(self.board_size):
                 line = line + " " + str(self.board[i+j*self.board_size]) 
-            print line
+            print(line)
 
 
     def __repr__(self):
@@ -490,6 +513,7 @@ def UCTPlayGame():
     #state = OXOState() # uncomment to play OXO
     # state = NimState(15) # uncomment to play Nim with the given number of starting chips
     state = OXOStateEX(11, 5)
+    state.PrintState()
     while (state.GetMoves() != []):
         #print str(state)
         if state.playerJustMoved == 1:
@@ -507,10 +531,54 @@ def UCTPlayGame():
         print "Player " + str(3 - state.playerJustMoved) + " wins!"
     else: print "Nobody wins!"
 
+def UCTPlayGameWithHuman():
+    """ Play a sample game between two UCT players where each player gets a different number 
+        of UCT iterations (= simulations = tree nodes).
+    """
+    # state = OthelloState(4) # uncomment to play Othello on a square board of the given size
+    #state = OXOState() # uncomment to play OXO
+    # state = NimState(15) # uncomment to play Nim with the given number of starting chips
+
+    borad_size = 11
+    win_length = 5
+
+    # borad_size = 3
+    # win_length = 3
+    state = OXOStateEX(borad_size, win_length)
+    # state = OXOState()
+
+    print("please select player X or O: 1 for X, 2 for O, 0 for computer")
+    human_player = int(raw_input("player:"))
+    print("You are player -- " + str(human_player))
+
+    while (state.GetMoves() != []):
+        #print str(state)
+        state.PrintState()
+        print("\n")
+        if (state.playerJustMoved + 1) % 2 == human_player:
+            print("please play with step x,y")
+            step = raw_input("step:")
+            index = step.split(",")
+            m = int(index[0])+ int(index[1])*borad_size 
+        else:
+            m = UCT(rootstate = state, itermax = 5000, verbose = False) # play with values for itermax and verbose = True
+            print "Best Move: " + str(m) + "\n"
+        state.DoMove(m)
+        state.PrintState()
+        print("\n")
+        if state.GetResult(state.playerJustMoved) == 1.0:
+            break
+    if state.GetResult(state.playerJustMoved) == 1.0:
+        print "Player " + str(state.playerJustMoved) + " wins!"
+    elif state.GetResult(state.playerJustMoved) == 0.0:
+        print "Player " + str(3 - state.playerJustMoved) + " wins!"
+    else: print "Nobody wins!"
+
 if __name__ == "__main__":
     """ Play a single game to the end using UCT for both players. 
     """
-    UCTPlayGame()
+    #UCTPlayGame()
+    UCTPlayGameWithHuman()
 
             
                           
